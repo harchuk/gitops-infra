@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: loki
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 5.36.3
+    helm:
+      values: |
+        loki:
+          auth_enabled: false
+          storage:
+            type: filesystem
+          storage_config:
+            filesystem:
+              directory: /data/loki/chunks
+          persistence:
+            enabled: true
+            size: 10Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true 

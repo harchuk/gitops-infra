@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: kube-prometheus-stack
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 55.4.0
+    helm:
+      values: |
+        grafana:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+          sidecar:
+            dashboards:
+              enabled: true
+          persistence:
+            enabled: true
+            size: 10Gi
+        alertmanager:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+          alertmanagerSpec:
+            storage:
+              volumeClaimTemplate:
+                spec:
+                  resources:
+                    requests:
+                      storage: 10Gi
+        prometheus:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+          prometheusSpec:
+            serviceMonitorSelector: {}
+            serviceMonitorNamespaceSelector: {}
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelector: {}
+            podMonitorNamespaceSelector: {}
+            podMonitorSelectorNilUsesHelmValues: false
+            retention: 14d
+            retentionSize: "30GB"
+            resources:
+              requests:
+                memory: 1Gi
+                cpu: 500m
+              limits:
+                memory: 2Gi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  resources:
+                    requests:
+                      storage: 50Gi
+        prometheus-node-exporter:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+        kube-state-metrics:
+          enabled: true
+        prometheusOperator:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 
