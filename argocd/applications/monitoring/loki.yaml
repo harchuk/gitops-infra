@@ -13,14 +13,18 @@ spec:
       values: |
         loki:
           auth_enabled: false
-          storage:
-            type: filesystem
-          storage_config:
-            filesystem:
-              directory: /data/loki/chunks
-          persistence:
-            enabled: true
-            size: 10Gi
+        singleBinary:
+          replicas: 1
+        monitoring:
+          selfMonitoring:
+            enabled: false
+          lokiCanary:
+            enabled: false
+        persistence:
+          enabled: true
+          size: 10Gi
+        test:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

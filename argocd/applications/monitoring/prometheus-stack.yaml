@@ -67,6 +67,7 @@ spec:
           enabled: true
           serviceMonitor:
             enabled: true
+          createCustomResource: true
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
