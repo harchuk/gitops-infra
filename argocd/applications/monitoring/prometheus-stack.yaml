@@ -21,6 +21,44 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
+          env:
+            - name: JAEGER_AGENT_HOST
+              value: "tempo"
+            - name: JAEGER_AGENT_PORT
+              value: "6831"
+            - name: JAEGER_ENDPOINT
+              value: "http://tempo:14268/api/traces"
+            - name: JAEGER_SAMPLER_TYPE
+              value: "const"
+            - name: JAEGER_SAMPLER_PARAM
+              value: "1"
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+                - name: Tempo
+                  type: tempo
+                  url: http://tempo:3100
+                  access: proxy
+                  isDefault: false
+                  jsonData:
+                    httpMethod: GET
+                    tracesToLogs:
+                      datasourceUid: 'loki'
+                      tags: ['job', 'instance', 'pod', 'namespace']
+                      mapTagNamesEnabled: false
+                      spanStartTimeShift: '1h'
+                      spanEndTimeShift: '1h'
+                    serviceMap:
+                      datasourceUid: 'prometheus'
+                    search:
+                      hide: false
+                    nodeGraph:
+                      enabled: true
+                    traceQuery:
+                      timeShiftEnabled: true
+                      spanStartTimeShift: '1h'
+                      spanEndTimeShift: '1h'
         alertmanager:
           enabled: true
           serviceMonitor:
